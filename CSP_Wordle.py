@@ -77,7 +77,18 @@ def Solve_RAC(word:str):
     n = len(word)
     RAC = Problem()
     RAC.addVariables(range(n),alph)
-    # Recuperation de l’ensemble des solutions possibles
+    
+    for _ in range(20):
+        s =[i for i in RAC.getSolution().values()]
+        r = check_correct2(word,s)
+        if r == (0,0,n):
+            for q in s:
+                RAC.addConstraint(NotInSetConstraint([q]))
+        
+        elif r == (_,_,0):
+            for q in s:
+                RAC.addConstraint(SomeInSetConstraint([q]))
+
     s = RAC.getSolutions()
     print("Nombre de solutions = ", len(s))
 
@@ -85,7 +96,7 @@ def Solve_RAC(word:str):
 def Solve_CSP_A2(gest_word:str):
     pass
 
-print(check_correct("eeh","hhh"))
-print(check_correct2("eeh","hhh"))
+#print(check_correct("eeh","hhh"))
+#print(check_correct2("eeh","hhh"))
 
 Solve_RAC(give_random_word(parse(),4))

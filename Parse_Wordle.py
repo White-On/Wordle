@@ -24,7 +24,7 @@ def give_random_word(words,number_letter:int):
 
 
 #print(parse())
-print(give_random_word(parse(),22),end="")
+#print(give_random_word(parse(),22),end="")
 
 
 
