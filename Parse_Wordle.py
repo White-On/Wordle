@@ -6,7 +6,8 @@ def parse(filename=os.path.dirname(os.path.abspath(__file__))+"\dico.txt"):
     words = {}
     file = open(filename,'r')
     try :
-        for line in file.readlines():
+        for l in file.readlines():
+            line= l[0:-1]
 
             if len(line) not in words.keys():
                 words[len(line)] = []
