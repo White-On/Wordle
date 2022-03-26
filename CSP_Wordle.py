@@ -9,9 +9,15 @@ def caract_in_words(words,list_caract):
     Trouve le ou les mots pouvant etre construit à partir d'une liste de lettres
     """
     res = []
+    test = True
     for word in words:
-        if set(word) == set(list_caract):
+        for c in list_caract:
+            if c not in set(word):
+                test = False
+                break
+        if test:
             res.append(word)
+        test = True
     return res
 
 def distance_edition(word1, words2):
@@ -220,7 +226,7 @@ def Solve_RAC(word:str,all_words):
     n = len(word)
     words_tried = []
     possible_words = all_words.copy()
-    itermax = 200
+    itermax = 20
     available_caracter = list(alph)
 
     # On cherche a avoir une valeur assigné aux lettres pour avoir une indications des
@@ -235,7 +241,25 @@ def Solve_RAC(word:str,all_words):
         
         generated_words = gener_compatible(n,[],possible_words,available_caracter,[])
 
-        sol = generated_words[random.randint(0,len(generated_words)-1)]
+        # On dois prendre un solution en fonction des poids des lettres
+        tmp = list(caract_weight.values())
+        tmp.sort(reverse=True)
+        tmp = tmp[0:int(n/2)]
+        most_value_caract = [c for c in caract_weight if caract_weight[c] in tmp][0:int(n/2)]
+        #print("tmp: ",tmp)
+        #print("most_value_caract: ",most_value_caract)
+
+        try:
+            plausible_words = caract_in_words(generated_words,most_value_caract)
+            sol = plausible_words[random.randint(0,len(plausible_words)-1)]
+        except:
+            print("no solution found")
+            sol = generated_words[random.randint(0,len(generated_words)-1)]
+
+        #sol = generated_words[random.randint(0,len(generated_words)-1)]
+
+        # On retire les mots testés pour ne pas les réutiliser dans la suite
+        possible_words.remove(sol)
         
         check = check_correct2(word,sol) 
         words_tried.append(sol)   
@@ -254,6 +278,9 @@ def Solve_RAC(word:str,all_words):
         if check[0] + check[1] >= n/2:
             for c in sol:
                 caract_weight[c] += check[0] + check[1] 
+        else:
+            for c in sol:
+                caract_weight[c] -= check[2]
 
     for c in alph:
         if caract_weight[c] == 0:
@@ -276,7 +303,7 @@ def Solve_RACAC(word:str,all_words):
     n = len(word)
     words_tried = []
     possible_words = all_words.copy()
-    itermax = 200
+    itermax = 20
     available_caracter = list(alph)
     unavailable_caracter = []
 
@@ -329,7 +356,7 @@ def Solve_Genetic(gest_word:str,all_words):
 
 all_words = parse()
 #Nombre de lettre dans le mot que l'on cherche
-N = 8
+N = 4
 
 #Solve_RAC(give_random_word(all_words,N),all_words[N])
 
@@ -355,3 +382,5 @@ Solve_RACAC(test,all_words[N])
 tpRACAC = time.time() - tp1
 
 print(f"temps RAC: {tpRAC} sec, temps RACAC: {tpRACAC} sec")
+
+#print(caract_in_words(["anubis","ane","nubian"],["a","n","u"]))
