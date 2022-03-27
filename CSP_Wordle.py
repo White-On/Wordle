@@ -1,6 +1,7 @@
 from Parse_Wordle import *
 import string
 import time
+import matplotlib.pyplot as plt
 
 alph = string.ascii_lowercase
 
@@ -226,7 +227,7 @@ def Solve_RAC(word:str,all_words):
     n = len(word)
     words_tried = []
     possible_words = all_words.copy()
-    itermax = 20
+    itermax = 2000
     available_caracter = list(alph)
 
     # On cherche a avoir une valeur assigné aux lettres pour avoir une indications des
@@ -253,7 +254,7 @@ def Solve_RAC(word:str,all_words):
             plausible_words = caract_in_words(generated_words,most_value_caract)
             sol = plausible_words[random.randint(0,len(plausible_words)-1)]
         except:
-            print("no solution found")
+            #print("no solution found")
             sol = generated_words[random.randint(0,len(generated_words)-1)]
 
         #sol = generated_words[random.randint(0,len(generated_words)-1)]
@@ -264,13 +265,17 @@ def Solve_RAC(word:str,all_words):
         check = check_correct2(word,sol) 
         words_tried.append(sol)   
 
+        # si le nombre de lettre mal placée est égale au nombre de lettres total du mot testé, *
+        # alors on sais que aucune des lettres composant le mot n'est dans le mot que l'on cherche
         if  check == (0,0,n):
             for l in list(set(sol)):
                 try:
+                    # donc on retire les lettres du champs des lettres possible et on les ajoute aux lettre impossibles
                     available_caracter.remove(l)
                 except:
                     continue
-
+        
+        # avec la même logique, si le nombre de lettre bien placé est égale au nombre de lettre du mot chercher, on a donc trouvée notre mot
         elif check == (n,0,0):
             print(f"Le mot cherchée était \"{word}\", le mot retrouvée est \"{sol}\"")
             return 
@@ -303,17 +308,43 @@ def Solve_RACAC(word:str,all_words):
     n = len(word)
     words_tried = []
     possible_words = all_words.copy()
-    itermax = 20
+    itermax = 2000
     available_caracter = list(alph)
     unavailable_caracter = []
+
+    # On cherche a avoir une valeur assigné aux lettres pour avoir une indications des
+    # lettre qui semblent présentent dans le mot
+
+    caract_weight = {}
+
+    for c in alph:
+        caract_weight[c] = 0
 
     for _ in range(itermax):
         
         # on génère tout les mots possibles avec les lettres à notre disposition
         generated_words = gener_compatible_forward(n,[],possible_words,available_caracter,[],unavailable_caracter)
 
-        # on pioche une solution possible parmis les mots générés
-        sol = generated_words[random.randint(0,len(generated_words)-1)]
+        
+        # On dois prendre un solution en fonction des poids des lettres
+        tmp = list(caract_weight.values())
+        tmp.sort(reverse=True)
+        tmp = tmp[0:int(n/2)]
+        most_value_caract = [c for c in caract_weight if caract_weight[c] in tmp][0:int(n/2)]
+        #print("tmp: ",tmp)
+        #print("most_value_caract: ",most_value_caract)
+
+        try:
+            plausible_words = caract_in_words(generated_words,most_value_caract)
+            sol = plausible_words[random.randint(0,len(plausible_words)-1)]
+        except:
+            #print("no solution found")
+            sol = generated_words[random.randint(0,len(generated_words)-1)]
+
+        #sol = generated_words[random.randint(0,len(generated_words)-1)]
+
+        # On retire les mots testés pour ne pas les réutiliser dans la suite
+        possible_words.remove(sol)
         
         # on teste le mot
         check = check_correct2(word,sol) 
@@ -335,11 +366,79 @@ def Solve_RACAC(word:str,all_words):
             print(f"Le mot cherchée était \"{word}\", le mot retrouvée est \"{sol}\"")
             return 
         
+        if check[0] + check[1] >= n/2:
+            for c in sol:
+                caract_weight[c] += check[0] + check[1] 
+        else:
+            for c in sol:
+                caract_weight[c] -= check[2]
+
+    for c in alph:
+        if caract_weight[c] == 0:
+            caract_weight.pop(c)
+        
+        if c not in available_caracter and c in caract_weight.keys():
+            caract_weight.pop(c)
+        
 
     print(f"mots testé : {words_tried}.\nlettre dispo : {available_caracter}")
     print(f"mot correct : {word}")
     assert(word not in words_tried)
     print(unavailable_caracter)
+
+
+def CompareTime(function1,function2,n_caracter,iteration):
+    """
+    Compare le temps d'execution de deux fonctions pour une certain nombre d'itération
+    """
+    function1_time = []
+    function2_time = []
+
+    all_words = parse()
+
+    if type(n_caracter).__name__ == "range":
+        function1_time = {n:[0] for n in n_caracter}
+        function2_time = {n:[0] for n in n_caracter}
+        function1_mean_time = []
+        function2_mean_time = []
+
+        for _ in range(iteration):
+            for n in n_caracter:
+                word = give_random_word(all_words,n)
+                start = time.time()
+                function1(word,all_words[n])
+                function1_time[n].append(time.time()-start)
+                start = time.time()
+                function2(word,all_words[n])
+                function2_time[n].append(time.time()-start)
+        
+        for n in n_caracter:
+            function1_mean_time.append(sum(function1_time[n])/iteration)
+            function2_mean_time.append(sum(function2_time[n])/iteration)
+
+        
+        plt.plot(n_caracter,function1_mean_time,label=function1.__name__)
+        plt.plot(n_caracter,function2_mean_time,label=function2.__name__)
+        plt.title(f"Comparaison du temps d'execution de {function1.__name__} et {function2.__name__}")
+        plt.legend()
+        plt.show()
+
+    else:
+        for _ in range(iteration):
+            word = give_random_word(all_words,n_caracter)
+            start = time.time()
+            function1(word,all_words[n_caracter])
+            end = time.time()
+            function1_time.append(end-start)
+
+            start = time.time()
+            function2(word,all_words[n_caracter])
+            end = time.time()
+            function2_time.append(end-start)
+        
+        print(f"{function1.__name__} : {sum(function1_time)/len(function1_time)}")
+        print(f"{function2.__name__} : {sum(function2_time)/len(function2_time)}")
+    
     
 def Solve_Genetic(gest_word:str,all_words):
     MAX_SIZE = 100
@@ -347,7 +446,7 @@ def Solve_Genetic(gest_word:str,all_words):
     E = []
     Population = []
 
-
+    
 ##########   MAIN   ##########
 
 
@@ -370,7 +469,7 @@ N = 4
 #print(compatible_lettre_interdites(['z'],all_words[5],['a','x','y']))
 #print(compatible(['z'],all_words[5]))
 
-
+"""
 test = give_random_word(all_words,N)
 
 tp1 = time.time()
@@ -381,6 +480,12 @@ tp1 = time.time()
 Solve_RACAC(test,all_words[N])
 tpRACAC = time.time() - tp1
 
-print(f"temps RAC: {tpRAC} sec, temps RACAC: {tpRACAC} sec")
+print(f"temps RAC: {tpRAC} sec, temps RACAC: {tpRACAC} sec")"""
 
 #print(caract_in_words(["anubis","ane","nubian"],["a","n","u"]))
+
+CompareTime(Solve_RAC,Solve_RACAC,range(4,9),5)
+
+# je dois maintenant faire des retours plus concret pour les algos 
+# pour pouvoir affichier leurs résultats plus clairement et 
+# egalement ajouter le systeme de timeout
