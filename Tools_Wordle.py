@@ -7,6 +7,7 @@ def caract_in_words(words,list_caract):
     test = True
     for word in words:
         for c in list_caract:
+            # si la lettre n'est pas dans le mot, on ne peux donc pas le construire à partir de notre liste de lettre
             if c not in set(word):
                 test = False
                 break
@@ -43,7 +44,9 @@ def closest_word(word:str,list_word)->str:
     """
     score = []
     for w in list_word:
+        # on calcule la distance d'édition entre les deux mots
         score.append(distance_edition(word,w))
+    # on retourne le mot le plus proche
     return list_word[score.index(min(score))]
 
 def check_correct(correct_word:str,proposition:str):
@@ -124,3 +127,15 @@ def check_correct2(correct_word:str,proposition:str):
 
     # format de retour (bonne lettre,lettre mal placé,mauvaise lettre)
     return tuple(res)
+
+def possible_words(list_caract,list_word):
+    """
+    Trouve les mots possibles pour un mot donné
+    """
+    res = list_word.copy()
+    for c in list_caract:
+        for w in res:
+            if c in set(w):
+                res.remove(w)
+    return res
+
