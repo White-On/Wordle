@@ -7,8 +7,8 @@ from Tools_Wordle import *
 alph = string.ascii_lowercase
 
 class Genetic_Word:
-    MAX_SIZE = 50
-    MAX_GEN = 30
+    MAX_SIZE = 10
+    MAX_GEN = 10
 
     # ensemble des mots compatibles avec les essais précedent
     E = []
@@ -184,6 +184,8 @@ class Genetic_Word:
         cls.Authaurised_Caracters = []
         cls.population = []
         cls.E = []
+        cls.MAX_SIZE = 50
+        cls.MAX_GEN = 30
 
     @classmethod
     def getE(cls) -> list:
@@ -192,8 +194,6 @@ class Genetic_Word:
         """
         return cls.E
     
-    
-        
     @staticmethod
     def generate_initial_population(words:list) -> list:
         """
@@ -224,7 +224,7 @@ def algo_genetique(words:list,Unauthorised_words:list,Authorised_Caracters:list,
             except Exception as e:
                 #print(e)
                 return Genetic_Word.getE()
-        Genetic_Word.population.sort(reverse=True,key=lambda x:x.fitness)
+        #Genetic_Word.population.sort(reverse=True,key=lambda x:x.fitness)
     
     return Genetic_Word.getE()
 
@@ -236,8 +236,7 @@ def Solve_Genetic(correct_word:str,words:list):
     Unauthorised_Caracters = []
     Score = {c:1 for c in alph}
     n = len(correct_word)
-    Authorised_Word = words
-
+    Authorised_Word = words.copy()
 
     iteration = 0
 
@@ -252,37 +251,42 @@ def Solve_Genetic(correct_word:str,words:list):
         Unauthorised_words.append(sol)
         Authorised_Word.remove(sol)
 
-
-        if check == (n,0,0):
+        if check[0] == n:
             print(f"Le mot cherchée était \"{correct_word}\", le mot retrouvée est \"{sol}\"")
             return iteration
-
         
-        elif  check == (0,0,n):
+        elif  check[2] == n:
             for l in list(set(sol)):
                 try:
                     # donc on retire les lettres du champs des lettres possible et on les ajoute aux lettre impossibles
                     Authorised_Caracters.remove(l)
                     Unauthorised_Caracters.append(l)
-                    Authorised_Word = possible_words(Unauthorised_Caracters,Authorised_Word)
-
+                    
                 except:
                     continue
+            Authorised_Word = remove_impossible(Unauthorised_Caracters,Authorised_Word)
         
         # si toutes les lettre sont au moins dans le mot que l'on cherche, notre liste de lettre 
         # possible est celle des lettres du mot que l'on viens de proposer
         elif check[2] == 0:
             Authorised_Caracters = list(set(sol))
             Unauthorised_Caracters = [c for c in alph if c not in Authorised_Caracters]
-            Authorised_Word = possible_words(Unauthorised_Caracters,Authorised_Word)
+            Authorised_Word = remove_impossible(Unauthorised_Caracters,Authorised_Word)
 
         # on calcule le score des lettres
-        
+        """
         for l in list(set(sol)):
             try:
                 Score[l] += check[1] + check[0]
             except:
-                continue
+                continue"""
+        
+        if check[0] + check[1] >= n/2:
+            for c in sol:
+                Score[c] += check[0] + check[1] 
+        else:
+            for c in sol:
+                Score[c] -= check[2]
     
     print(f"mots testé : {Unauthorised_words}.\nlettre dispo : {Authorised_Caracters}")
     print(f"Score : {Score}")
@@ -321,10 +325,6 @@ def plot_result2(spectre:range,words:list)->None:
     plt.legend()
     plt.show()
 
-
-
-
-
 ##########   MAIN   ##########
 
 
@@ -356,4 +356,4 @@ print(E)
 
 #print(Solve_Genetic(give_random_word(all_words,N),all_words[N]))
 
-plot_result(range(4,9),all_words,Solve_Genetic)
+plot_result(range(4,7),all_words,Solve_Genetic)

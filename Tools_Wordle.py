@@ -131,17 +131,6 @@ def check_correct2(correct_word:str,proposition:str):
     # format de retour (bonne lettre,lettre mal placé,mauvaise lettre)
     return tuple(res)
 
-def possible_words(list_caract,list_words):
-    """
-    Trouve les mots possibles pour un mot donné
-    """
-    res = list_words.copy()
-    for c in list_caract:
-        for w in res:
-            if c in set(w):
-                res.remove(w)
-    return res
-
 def remove_impossible(unavailable_caracters,list_words):
     """
     Supprime les mots impossible d'une liste pour une litste de lettre interdites
@@ -308,6 +297,7 @@ def plot_result_intervalle(spectre:range,all_words:list,function,intervalle=None
     plt.show()
 
 def Compare4(function1,function2,function3,function4,n_caracter,instance,maxiter=False)->None:
+
     """
     Compare le temps d'execution de quatres fonctions pour une certain nombre d'itération
     """
@@ -392,3 +382,26 @@ def Compare4(function1,function2,function3,function4,n_caracter,instance,maxiter
     plt.ylabel("itérations")
     plt.legend()
     plt.show()
+
+def check_correct3(correct_word:str,proposition:str):
+    #taille du mot
+    n = len(correct_word)
+    res = [0,0,0]
+    word = list(correct_word)
+    print(proposition)
+    proposition = list(proposition)
+
+    for i in range(n):
+        if proposition[i] in list(set(word)):
+            if correct_word[i] == proposition[i]:
+                res[0] += 1
+            else:
+                res[1] += 1
+            word.remove(proposition[i])
+        else:
+            res[2] += 1
+    
+    return tuple(res)
+
+
+    

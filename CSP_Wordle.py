@@ -319,10 +319,11 @@ def Solve_RACAC(correct_word:str,all_words)->None:
                     # donc on retire les lettres du champs des lettres possible et on les ajoute aux lettre impossibles
                     available_caracter.remove(l)
                     unavailable_caracter.append(l)
-                    #on retire les mots contenant les lettres impossible
-                    possible_words = remove_impossible(unavailable_caracter,possible_words)
+                    
                 except:
                     continue
+            #on retire les mots contenant les lettres impossible
+            possible_words = remove_impossible(unavailable_caracter,possible_words)
         
         # si toutes les lettre sont au moins dans le mot que l'on cherche, notre liste de lettre 
         # possible est celle des lettres du mot que l'on viens de proposer
@@ -422,10 +423,11 @@ def SolveA2(correct_word:str,all_words)->None:
                     # donc on retire les lettres du champs des lettres possible et on les ajoute aux lettre impossibles
                     available_caracter.remove(l)
                     unavailable_caracter.append(l)
-                    #on retire les mots contenant les lettres impossible
-                    possible_words = remove_impossible(unavailable_caracter,possible_words)
+                    
                 except:
                     continue
+            #on retire les mots contenant les lettres impossible
+            possible_words = remove_impossible(unavailable_caracter,possible_words)
         
         # si toutes les lettre sont au moins dans le mot que l'on cherche, notre liste de lettre 
         # possible est celle des lettres du mot que l'on viens de proposer
@@ -481,4 +483,4 @@ print(f"temps RAC: {tpRAC} sec, temps RACAC: {tpRACAC} sec")"""
 
 #plot_result_intervalle(range(4,9),all_words,Solve_RACAC,20)
 
-Compare4(Solve_RAC,Solve_RACAC,SolveA1,SolveA2,range(4,9),20)
+Compare4(Solve_RAC,Solve_RACAC,SolveA1,SolveA2,range(7,9),2)
