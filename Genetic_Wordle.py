@@ -8,12 +8,12 @@ alph = string.ascii_lowercase
 
 class Genetic_Word:
     MAX_SIZE = 50
-    MAX_GEN = 10
+    MAX_GEN = 30
 
     # ensemble des mots compatibles avec les essais précedent
     E = []
 
-    TAILLE_POP = 100
+    TAILLE_POP = 50
     population = []
 
     def __init__(self,word:str) -> None:
@@ -239,22 +239,23 @@ def Solve_Genetic(correct_word:str,words:list):
     Authorised_Word = words
 
 
-    iteration = 200
+    iteration = 0
 
-    for _ in range(iteration):
+    while True:
         sol = random.choice(algo_genetique(Authorised_Word,Unauthorised_words,Authorised_Caracters,Score))
 
-        print(f"{_}/{iteration}"+"\tsolution "+sol)
+        iteration += 1
+        print(f"iteration {iteration}"+"\tsolution "+sol)
+
         # on teste le mot
         check = check_correct2(correct_word,sol) 
         Unauthorised_words.append(sol)
         Authorised_Word.remove(sol)
 
-        print(f"Le mot cherchée était \"{correct_word}\", le mot retrouvée est \"{sol}\"")
 
         if check == (n,0,0):
             print(f"Le mot cherchée était \"{correct_word}\", le mot retrouvée est \"{sol}\"")
-            return 
+            return iteration
 
         
         elif  check == (0,0,n):
@@ -267,6 +268,13 @@ def Solve_Genetic(correct_word:str,words:list):
 
                 except:
                     continue
+        
+        # si toutes les lettre sont au moins dans le mot que l'on cherche, notre liste de lettre 
+        # possible est celle des lettres du mot que l'on viens de proposer
+        elif check[2] == 0:
+            Authorised_Caracters = list(set(sol))
+            Unauthorised_Caracters = [c for c in alph if c not in Authorised_Caracters]
+            Authorised_Word = possible_words(Unauthorised_Caracters,Authorised_Word)
 
         # on calcule le score des lettres
         
@@ -281,6 +289,40 @@ def Solve_Genetic(correct_word:str,words:list):
     print(f"mot correct : {correct_word}")
         
     
+def plot_result2(spectre:range,words:list)->None:
+    """
+    Permet de tracer les resultats de l'algorithme génétique
+    """
+    list_time = []
+    iteration = []
+
+    for n in spectre:
+        start = time.time()
+        iteration.append(Solve_Genetic(give_random_word(words,n),words[n]))
+        end = time.time()
+        list_time.append(end-start)
+        plt.scatter(n,len(words[n]),label=f"{n} lettres")
+        
+
+    
+    # on tracer le graphique de la vitesse de résolution de l'algorithme génétique
+    plt.plot(spectre,list_time,label="temps")
+    plt.xlabel("taille du mot en nombre de lettre")
+    plt.ylabel("temps d'execution en sec")
+    plt.title(f"Vitesse de résolution de l'algorithme génétique")
+    plt.legend()
+    plt.show()
+
+    # on tracer le graphique de la vitesse de résolution de l'algorithme génétique
+    plt.plot(spectre,iteration,label="itération")
+    plt.xlabel("taille du mot en nombre de lettre")
+    plt.ylabel("itérations")
+    plt.title(f"Nombre d'itération de l'algorithme génétique ")
+    plt.legend()
+    plt.show()
+
+
+
 
 
 ##########   MAIN   ##########
@@ -288,7 +330,7 @@ def Solve_Genetic(correct_word:str,words:list):
 
 all_words = parse()
 #Nombre de lettre dans le mot que l'on cherche
-N = 4
+N = 5
 
 #Genetic_Word.generate_initial_population(all_words[N])
 """
@@ -312,4 +354,6 @@ print(E)
 
 """
 
-Solve_Genetic(give_random_word(all_words,N),all_words[N])
+#print(Solve_Genetic(give_random_word(all_words,N),all_words[N]))
+
+plot_result(range(4,9),all_words,Solve_Genetic)
