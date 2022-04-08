@@ -1,6 +1,7 @@
 from Parse_Wordle import *
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 def caract_in_words(words,list_caract):
     """
@@ -41,6 +42,15 @@ def distance_edition(word1, words2):
             dist[i,j] = min(opt)
     return dist[len(word1)-1,len(words2)-1]
 
+def distance_edition_recursive(mot1, mot2):
+    if len(mot1) == 0 : return len(mot2)
+    elif len(mot2) == 0 : return len(mot1)
+    else :
+        return min ( distance_edition_recursive(mot1[:-1], mot2) + 1,
+                     distance_edition_recursive(mot1, mot2[:-1]) + 1,
+                     distance_edition_recursive(mot1[:-1], mot2[:-1]) + \
+                          (1 if mot1[-1] != mot2[-1] else 0))
+
 def closest_word(word:str,list_word)->str:
     """
     Trouve le mot le plus proche parmis une liste de mot
@@ -49,6 +59,17 @@ def closest_word(word:str,list_word)->str:
     for w in list_word:
         # on calcule la distance d'édition entre les deux mots
         score.append(distance_edition(word,w))
+    # on retourne le mot le plus proche
+    return list_word[score.index(min(score))]
+
+def closest_word_recursive(word:str,list_word)->str:
+    """
+    Trouve le mot le plus proche parmis une liste de mot
+    """
+    score = []
+    for w in list_word:
+        # on calcule la distance d'édition entre les deux mots
+        score.append(distance_edition_recursive(word,w))
     # on retourne le mot le plus proche
     return list_word[score.index(min(score))]
 
@@ -383,6 +404,51 @@ def Compare4(function1,function2,function3,function4,n_caracter,instance,maxiter
     plt.legend()
     plt.show()
 
+    # plus belle affichage
+    fit_25 = [];fit_75 = [];median_max = []
+    for n in n_caracter:
+        fit_25.append(np.quantile(function1_iter[n],25))
+        fit_75.append(np.quantile(function1_iter[n],75))
+        median_max.append(np.mean(function1_iter[n]))
+        
+    plt.fill_between(n_caracter, fit_25, fit_75, alpha=0.25, linewidth=0)
+    plt.plot(n_caracter,median_max,label="{}".format(function1.__name__))
+
+    fit_25 = [];fit_75 = [];median_max = []
+    for n in n_caracter:
+        fit_25.append(np.quantile(function2_iter[n],25))
+        fit_75.append(np.quantile(function2_iter[n],75))
+        median_max.append(np.mean(function2_iter[n]))
+        
+    plt.fill_between(n_caracter, fit_25, fit_75, alpha=0.25, linewidth=0)
+    plt.plot(n_caracter,median_max,label="{}".format(function2.__name__))
+
+    fit_25 = [];fit_75 = [];median_max = []
+    for n in n_caracter:
+        fit_25.append(np.quantile(function3_iter[n],25))
+        fit_75.append(np.quantile(function3_iter[n],75))
+        median_max.append(np.mean(function3_iter[n]))
+        
+    plt.fill_between(n_caracter, fit_25, fit_75, alpha=0.25, linewidth=0)
+    plt.plot(n_caracter,median_max,label="{}".format(function3.__name__))
+
+    fit_25 = [];fit_75 = [];median_max = []
+    for n in n_caracter:
+        fit_25.append(np.quantile(function4_iter[n],25))
+        fit_75.append(np.quantile(function4_iter[n],75))
+        median_max.append(np.mean(function4_iter[n]))
+        
+    plt.fill_between(n_caracter, fit_25, fit_75, alpha=0.25, linewidth=0)
+    plt.plot(n_caracter,median_max,label="{}".format(function4.__name__))
+
+    plt.xlabel("taille du mot en nombre de lettre")
+    plt.ylabel("itérations")
+    plt.legend()
+    plt.show()
+
+
+
+
 def check_correct3(correct_word:str,proposition:str):
     #taille du mot
     n = len(correct_word)
@@ -403,5 +469,17 @@ def check_correct3(correct_word:str,proposition:str):
     
     return tuple(res)
 
+def levenshteinDistance(s1, s2):
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
 
-    
+    distances = range(len(s1) + 1)
+    for i2, c2 in enumerate(s2):
+        distances_ = [i2+1]
+        for i1, c1 in enumerate(s1):
+            if c1 == c2:
+                distances_.append(distances[i1])
+            else:
+                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+        distances = distances_
+    return distances[-1]

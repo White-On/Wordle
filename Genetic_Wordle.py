@@ -5,22 +5,24 @@ import matplotlib.pyplot as plt
 from Tools_Wordle import *
 
 alph = string.ascii_lowercase
+vowels = ["a","e","i","o","u"]
 
 class Genetic_Word:
-    MAX_SIZE = 10
-    MAX_GEN = 10
+    MAX_SIZE = 50
+    MAX_GEN = 30
+    MUTATION_PROB = 0.2
+    
 
     # ensemble des mots compatibles avec les essais précedent
     E = []
 
-    TAILLE_POP = 50
+    TAILLE_POP = 200
     population = []
 
     def __init__(self,word:str) -> None:
         self.word = word
         self.fitness = self.evalutation()
         Genetic_Word.population.append(self)
-        Genetic_Word.population.sort(reverse=True,key=lambda x:x.fitness)
     
     def __eq__(self, __o: object) -> bool:
         return self.word == __o.word
@@ -46,26 +48,8 @@ class Genetic_Word:
         elif r > 0.66:
             self.exchangeCaracter()
         else:
-            self.crossover(random.choice(self.population))
+            self.crossover(random.choice(Genetic_Word.population))
         
-        # On dois maintenant faire en sorte que le nouveau mot soit 
-        # compatible avec les mots possibles et qu'il n'y ait 
-        # pas de doublon dans la population.
-
-        
-        if self.word in Genetic_Word.Authaurised_Words:
-            if self.word not in Genetic_Word.E:
-                Genetic_Word.E.append(self.word)
-                
-        else:
-            self.word = closest_word(self.word,Genetic_Word.Authaurised_Words)
-            if self.word not in Genetic_Word.E:
-                Genetic_Word.E.append(self.word)
-        
-        self.fitness = self.evalutation()
-
-        if len(Genetic_Word.E) >= Genetic_Word.MAX_SIZE:
-                    raise Exception("La taille de l'ensemble de solution à atteind la limite")
 
     def randomCaracterChange(self) -> None:
         """
@@ -79,7 +63,7 @@ class Genetic_Word:
         Fonction qui effectue un echange de caractere aleatoire
         """
         i = random.randint(0,len(self.word)-2)
-        j = random.randint(i,len(self.word)-1)
+        j = random.randint(i+1,len(self.word)-1)
         self.word = self.word[:i] + self.word[j] + self.word[i+1:j] + self.word[i] + self.word[j+1:]
     
     def crossover(self,other) -> None:
@@ -87,10 +71,30 @@ class Genetic_Word:
         Fonction qui effectue un crossover entre deux mots
         """
         if len(self.word) != len(other.word):
-            raise Exception("Les deux mots doivent avoir la meme taille")
+            raise Exception(f"Les deux mots doivent avoir la meme taille ({self.word} et {other.word})")
         else:
             i = random.randint(0,len(self.word)-1)
             self.word = self.word[:i] + other.word[i:]
+        
+    def setCompatible(self):
+        # On dois maintenant faire en sorte que le nouveau mot soit 
+        # compatible avec les mots possibles et qu'il n'y ait 
+        # pas de doublon dans la population.
+
+        
+        if self.word in Genetic_Word.Authaurised_Words:
+            if self.word not in Genetic_Word.E:
+                Genetic_Word.E.append(self.word)
+            
+        else:
+            self.word = closest_word(self.word,Genetic_Word.Authaurised_Words)
+            if self.word not in Genetic_Word.E:
+                Genetic_Word.E.append(self.word)
+        
+        self.fitness = self.evalutation()
+
+        if len(Genetic_Word.E) >= Genetic_Word.MAX_SIZE:
+                    raise Exception("La taille de l'ensemble de solution à atteind la limite")
     
     @classmethod
     def breed(cls,parent1, parent2) -> None:
@@ -216,16 +220,17 @@ def algo_genetique(words:list,Unauthorised_words:list,Authorised_Caracters:list,
     for _ in range(0,Genetic_Word.MAX_GEN):
         parents = Genetic_Word.get_N_best_word(int(Genetic_Word.TAILLE_POP/2))
         Genetic_Word.resetPopulation()
-        for _ in range(0,Genetic_Word.TAILLE_POP):
+        for _ in range(0,int(Genetic_Word.TAILLE_POP/2)):
             Genetic_Word.breed(random.choice(parents),random.choice(parents))
-        for i in range(0,Genetic_Word.TAILLE_POP):
-            try:
+        for i in range(0,int(Genetic_Word.TAILLE_POP/2)):
+            if random.random() < Genetic_Word.MUTATION_PROB:
                 Genetic_Word.population[i].mutation()
+            try:
+                Genetic_Word.population[i].setCompatible()
             except Exception as e:
                 #print(e)
                 return Genetic_Word.getE()
-        #Genetic_Word.population.sort(reverse=True,key=lambda x:x.fitness)
-    
+        Genetic_Word.population.extend(parents)
     return Genetic_Word.getE()
 
 
@@ -274,23 +279,19 @@ def Solve_Genetic(correct_word:str,words:list):
             Authorised_Word = remove_impossible(Unauthorised_Caracters,Authorised_Word)
 
         # on calcule le score des lettres
-        """
+        
         for l in list(set(sol)):
             try:
                 Score[l] += check[1] + check[0]
             except:
-                continue"""
+                continue
         
-        if check[0] + check[1] >= n/2:
+        """if check[0] + check[1] >= n/2:
             for c in sol:
                 Score[c] += check[0] + check[1] 
         else:
             for c in sol:
-                Score[c] -= check[2]
-    
-    print(f"mots testé : {Unauthorised_words}.\nlettre dispo : {Authorised_Caracters}")
-    print(f"Score : {Score}")
-    print(f"mot correct : {correct_word}")
+                Score[c] -= check[2]"""
         
     
 def plot_result2(spectre:range,words:list)->None:
@@ -356,4 +357,5 @@ print(E)
 
 #print(Solve_Genetic(give_random_word(all_words,N),all_words[N]))
 
-plot_result(range(4,7),all_words,Solve_Genetic)
+plot_result_intervalle(range(3,6),all_words,Solve_Genetic,5)
+

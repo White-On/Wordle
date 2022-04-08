@@ -483,4 +483,4 @@ print(f"temps RAC: {tpRAC} sec, temps RACAC: {tpRACAC} sec")"""
 
 #plot_result_intervalle(range(4,9),all_words,Solve_RACAC,20)
 
-Compare4(Solve_RAC,Solve_RACAC,SolveA1,SolveA2,range(7,9),2)
+Compare4(Solve_RAC,Solve_RACAC,SolveA1,SolveA2,range(4,9),20)
