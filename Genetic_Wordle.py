@@ -37,6 +37,8 @@ class Genetic_Word:
         # On pars sur une heristique basé sur le nombre de 
         # lettre compatible lors des essais précedents
         return sum([Genetic_Word.Score_Caracter[c] for c in self.word])
+        # ona as pu tester avec les voyelles uniquemment mais cela n'a pas été probant 
+        return sum([Genetic_Word.Score_Caracter[c] for c in self.word if c in vowels])
     
     def mutation(self) -> None:
         """
