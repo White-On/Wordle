@@ -8,11 +8,13 @@ alph = string.ascii_lowercase
 vowels = ["a","e","i","o","u"]
 
 class Genetic_Word:
+    """
+    Classe permettant de gérer la population de mots
+    """
     MAX_SIZE = 50
     MAX_GEN = 30
     MUTATION_PROB = 0.2
     
-
     # ensemble des mots compatibles avec les essais précedent
     E = []
 
@@ -25,6 +27,9 @@ class Genetic_Word:
         Genetic_Word.population.append(self)
     
     def __eq__(self, __o: object) -> bool:
+        """
+        deux mot sont egaux si ils ont la meme taille et le meme contenu
+        """
         return self.word == __o.word
     
     def __repr__(self) -> str:
@@ -81,9 +86,8 @@ class Genetic_Word:
     def setCompatible(self):
         # On dois maintenant faire en sorte que le nouveau mot soit 
         # compatible avec les mots possibles et qu'il n'y ait 
-        # pas de doublon dans la population.
+        # pas de doublon dans la liste E.
 
-        
         if self.word in Genetic_Word.Authaurised_Words:
             if self.word not in Genetic_Word.E:
                 Genetic_Word.E.append(self.word)
@@ -211,27 +215,43 @@ class Genetic_Word:
     
 
 def algo_genetique(words:list,Unauthorised_words:list,Authorised_Caracters:list,Score:list) -> list:
+    """
+    L'algorithme genetique au coeur de l'application
+    Il dois generer une liste de mots compatibles avec le dictionnaire fournie et 
+    respecter les caracteres autorises et les caracteres non autorises
+    """
+
+    # On initialise la classe
     Genetic_Word.reset_Class()
     Genetic_Word.set_Authaurised_Word(words)
     Genetic_Word.set_Authaurised_Caracters(Authorised_Caracters)
     Genetic_Word.set_UnAuthaurised_Word(Unauthorised_words)
     Genetic_Word.set_Score_Caracter(Score)
 
+    # On genere la population
     Genetic_Word.generate_initial_population(words)
 
+    # On fait tourner l'algorithme genetique
     for _ in range(0,Genetic_Word.MAX_GEN):
+        # On selectionne les meilleurs individus de la population
         parents = Genetic_Word.get_N_best_word(int(Genetic_Word.TAILLE_POP/2))
+        #On efface la population des registres
         Genetic_Word.resetPopulation()
+        #On remplit la population avec les meilleurs individus et les individus croises
         for _ in range(0,int(Genetic_Word.TAILLE_POP/2)):
             Genetic_Word.breed(random.choice(parents),random.choice(parents))
+        # On crée des mutation sur la population
         for i in range(0,int(Genetic_Word.TAILLE_POP/2)):
             if random.random() < Genetic_Word.MUTATION_PROB:
                 Genetic_Word.population[i].mutation()
             try:
+                # On dois maintenant faire en sorte que la population soit compatible avec le dictionnaire
                 Genetic_Word.population[i].setCompatible()
             except Exception as e:
+                # Si une exception est levée, la liste E est pleine
                 #print(e)
                 return Genetic_Word.getE()
+        #on ajoute les parents a la population
         Genetic_Word.population.extend(parents)
     return Genetic_Word.getE()
 
@@ -248,6 +268,7 @@ def Solve_Genetic(correct_word:str,words:list):
     iteration = 0
 
     while True:
+        # On cherche les mots compatibles avec l'algorithme genetique
         sol = random.choice(algo_genetique(Authorised_Word,Unauthorised_words,Authorised_Caracters,Score))
 
         iteration += 1
@@ -296,68 +317,47 @@ def Solve_Genetic(correct_word:str,words:list):
                 Score[c] -= check[2]"""
         
     
-def plot_result2(spectre:range,words:list)->None:
-    """
-    Permet de tracer les resultats de l'algorithme génétique
-    """
-    list_time = []
-    iteration = []
+# def plot_result2(spectre:range,words:list)->None:
+#     """
+#     Permet de tracer les resultats de l'algorithme génétique
+#     """
+#     list_time = []
+#     iteration = []
 
-    for n in spectre:
-        start = time.time()
-        iteration.append(Solve_Genetic(give_random_word(words,n),words[n]))
-        end = time.time()
-        list_time.append(end-start)
-        plt.scatter(n,len(words[n]),label=f"{n} lettres")
+#     for n in spectre:
+#         start = time.time()
+#         iteration.append(Solve_Genetic(give_random_word(words,n),words[n]))
+#         end = time.time()
+#         list_time.append(end-start)
+#         plt.scatter(n,len(words[n]),label=f"{n} lettres")
         
 
     
-    # on tracer le graphique de la vitesse de résolution de l'algorithme génétique
-    plt.plot(spectre,list_time,label="temps")
-    plt.xlabel("taille du mot en nombre de lettre")
-    plt.ylabel("temps d'execution en sec")
-    plt.title(f"Vitesse de résolution de l'algorithme génétique")
-    plt.legend()
-    plt.show()
+#     # on tracer le graphique de la vitesse de résolution de l'algorithme génétique
+#     plt.plot(spectre,list_time,label="temps")
+#     plt.xlabel("taille du mot en nombre de lettre")
+#     plt.ylabel("temps d'execution en sec")
+#     plt.title(f"Vitesse de résolution de l'algorithme génétique")
+#     plt.legend()
+#     plt.show()
 
-    # on tracer le graphique de la vitesse de résolution de l'algorithme génétique
-    plt.plot(spectre,iteration,label="itération")
-    plt.xlabel("taille du mot en nombre de lettre")
-    plt.ylabel("itérations")
-    plt.title(f"Nombre d'itération de l'algorithme génétique ")
-    plt.legend()
-    plt.show()
+#     # on tracer le graphique de la vitesse de résolution de l'algorithme génétique
+#     plt.plot(spectre,iteration,label="itération")
+#     plt.xlabel("taille du mot en nombre de lettre")
+#     plt.ylabel("itérations")
+#     plt.title(f"Nombre d'itération de l'algorithme génétique ")
+#     plt.legend()
+#     plt.show()
 
-##########   MAIN   ##########
 
+######################    Test des commandes    ######################
 
 all_words = parse()
 #Nombre de lettre dans le mot que l'on cherche
 N = 5
 
-#Genetic_Word.generate_initial_population(all_words[N])
-"""
-Genetic_Word.set_Authaurised_Word(all_words[N])
-Genetic_Word.set_Authaurised_Caracters(alph)
-parent1 = Genetic_Word("coucou")
-parent2 = Genetic_Word("pommes")
-print(Genetic_Word.getPopulation())
-Genetic_Word.breed(parent1,parent2)
-print(Genetic_Word.getPopulation())
-
-for p in Genetic_Word.getPopulation():
-    p.mutation()
-print(Genetic_Word.get_best_word().fitness)
-print(Genetic_Word.getPopulation())
-print(Genetic_Word.getE())
-
-score = {c:1 for c in alph }
-E = algo_genetique(all_words[N],[],alph,score)
-print(E)
-
-"""
-
 #print(Solve_Genetic(give_random_word(all_words,N),all_words[N]))
 
-plot_result_intervalle(range(3,6),all_words,Solve_Genetic,5)
+#plot_result_intervalle(range(3,6),all_words,Solve_Genetic,5)
 
+######################    Test des commandes    ######################

@@ -280,7 +280,7 @@ def Compare(function1,function2,n_caracter,instance,maxiter=False)->None:
         print(f"{function1.__name__} : {sum(function1_iter)/len(function1_iter)}")
         print(f"{function2.__name__} : {sum(function2_iter)/len(function2_iter)}")
 
-def plot_result_intervalle(spectre:range,all_words:list,function,intervalle=None,maxiter=False):
+def plot_result_intervalle(spectre:range,all_words:list,function,intervalle=None,maxiter=False)->None:
     function1_time = {n:[0] for n in spectre}
     function1_mean_time = []
 
@@ -446,9 +446,6 @@ def Compare4(function1,function2,function3,function4,n_caracter,instance,maxiter
     plt.legend()
     plt.show()
 
-
-
-
 def check_correct3(correct_word:str,proposition:str):
     #taille du mot
     n = len(correct_word)
@@ -483,3 +480,4 @@ def levenshteinDistance(s1, s2):
                 distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
         distances = distances_
     return distances[-1]
+

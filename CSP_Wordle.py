@@ -437,14 +437,11 @@ def SolveA2(correct_word:str,all_words)->None:
             possible_words = remove_impossible(unavailable_caracter,possible_words)
 
 
-##########   MAIN   ##########
+######################    Test des commandes    ######################
 
 all_words = parse()
 #Nombre de lettre dans le mot que l'on cherche
 N = 4
-
-#print(check_correct("eeh","hhh"))
-#print(check_correct2(['e','e','h'],['h','h','h']))
 
 #SolveA1(give_random_word(all_words,N),all_words[N])
 
@@ -454,33 +451,13 @@ N = 4
 
 #Solve_RACAC(give_random_word(all_words,N),all_words[N])
 
-#print(compatible(['a'],all_words[N]))
-#res = gener_compatible(N,[],all_words[N],list(alph),[])
-#print(res)
-
-
-#print(compatible_lettre_interdites(['z'],all_words[5],['a','x','y']))
-#print(compatible(['z'],all_words[5]))
-
-"""
-test = give_random_word(all_words,N)
-
-tp1 = time.time()
-Solve_RAC(test,all_words[N])
-tpRAC = time.time() - tp1
-
-tp1 = time.time()
-Solve_RACAC(test,all_words[N])
-tpRACAC = time.time() - tp1
-
-print(f"temps RAC: {tpRAC} sec, temps RACAC: {tpRACAC} sec")"""
-
-#print(caract_in_words(["anubis","ane","nubian"],["a","n","u"]))
-
 #Compare(SolveA1,SolveA2,range(4,9),20)
 
 #plot_result(range(4,9),all_words,SolveA2)
 
 #plot_result_intervalle(range(4,9),all_words,Solve_RACAC,20)
 
-Compare4(Solve_RAC,Solve_RACAC,SolveA1,SolveA2,range(4,9),20)
+#Compare4(Solve_RAC,Solve_RACAC,SolveA1,SolveA2,range(4,9),20)
+
+
+######################    Test des commandes    ######################
